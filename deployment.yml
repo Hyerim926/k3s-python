@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flask-app-pod
+  template:
+    metadata:
+      labels:
+        app: flask-app-pod
+    spec:
+      containers:
+      - name: flask-app-pod-image
+        image: k3d-test-app-registry:5050/k3s-kubernetes-flask-hello-world
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5500
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-app-service
+spec:
+  selector:
+    app: flask-app-pod
+  ports:
+  - protocol: "TCP"
+    port: 6000
+    targetPort: 5500
+  type: LoadBalancer
